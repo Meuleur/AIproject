@@ -2,6 +2,9 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "/Users/jbcaron/Desktop/Dev"
+    ],
     "allow": [
       "Read(**)",
       "Write(**)",
@@ -23,8 +26,19 @@
       "Bash(git revert:*)",
       "Bash(git stash:*)",
       "Bash(git config:*)",
+      "Bash(git remote:*)",
+      "Bash(git init:*)",
+      "Bash(git clone:*)",
+      "Bash(git fetch:*)",
+      "Bash(git rebase:*)",
 
-      "Bash(gh:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gh repo create:*)",
+      "Bash(gh repo clone:*)",
+      "Bash(gh repo list:*)",
+      "Bash(gh repo edit:*)",
+      "Bash(gh auth status:*)",
+      "Bash(gh api:*)",
 
       "Bash(python:*)",
       "Bash(python3:*)",
@@ -34,6 +48,7 @@
       "Bash(ruff:*)",
       "Bash(black:*)",
       "Bash(isort:*)",
+      "Bash(jupyter:*)",
 
       "Bash(node:*)",
       "Bash(npm:*)",
@@ -43,6 +58,8 @@
 
       "Bash(ls:*)",
       "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
       "Bash(mkdir:*)",
       "Bash(touch:*)",
       "Bash(cp:*)",
@@ -51,20 +68,30 @@
       "Bash(echo:*)",
       "Bash(pwd)",
       "Bash(which:*)",
+      "Bash(test:*)",
+      "Bash(grep:*)",
+      "Bash(sed:*)",
+      "Bash(awk:*)",
+      "Bash(wc:*)",
+      "Bash(sort:*)",
+      "Bash(cd:*)",
 
       "WebFetch(domain:huggingface.co)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:pytorch.org)",
-      "WebFetch(domain:docs.python.org)"
+      "WebFetch(domain:docs.python.org)",
+      "WebFetch(domain:scikit-learn.org)"
     ],
     "deny": [
       "Bash(rm -rf /:*)",
       "Bash(rm -rf ~:*)",
+      "Bash(rm -rf $HOME:*)",
       "Bash(sudo:*)",
       "Bash(curl * | sh:*)",
       "Bash(curl * | bash:*)",
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
+      "Bash(gh repo delete:*)",
       "Read(.env)",
       "Read(**/.env)",
       "Read(**/*.key)",

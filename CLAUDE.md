@@ -1,70 +1,102 @@
 # Contexte du repo — pour Claude Code
 
-Ce repo est un monorepo de projets d'IA construits incrémentalement.
-Chaque projet vit dans `projects/<nom-du-projet>/`. Le plan global est dans `ROADMAP.md`.
+Ce repo (`Meuleur/AIproject`) est le **centre de contrôle** de mon portfolio ML/LLM.
+Il contient :
+- `ROADMAP.md` : la liste de tous les projets et tâches
+- `.claude/commands/go.md` : la slash command `/go` qui exécute le travail quotidien
+- `projects/sentiment-analyzer/` : un projet legacy hébergé dans ce même repo (à migrer)
 
-## Comment je bosse
+## Architecture multi-repo
 
-- Mon workflow quotidien : je lance `claude` à la racine, je tape `/go`, et tu fais avancer le projet actif d'un cran.
-- Un commit = une vraie contribution. Pas de remplissage cosmétique du graphe GitHub.
-- Je préfère la **qualité** à la quantité. Mieux vaut zéro commit aujourd'hui qu'un commit bidon.
+Chaque autre projet vit dans **son propre repo GitHub public** sous le compte `Meuleur` (ex: `Meuleur/lora-lab`, `Meuleur/nano-llm-fr`). Les clones locaux sont dans `~/Desktop/Dev/<slug>/`, en frères de ce repo de contrôle.
+
+Workflow type quand je tape `/go` :
+
+1. Claude lit ce ROADMAP
+2. Identifie le projet actif (premier avec tâches non cochées)
+3. Si le repo GitHub du projet n'existe pas → `gh repo create Meuleur/<slug> --public --clone`
+4. cd dans `~/Desktop/Dev/<slug>/` et fait 5 tâches (1 commit par tâche)
+5. Push le projet
+6. Revient ici, met à jour le ROADMAP, commit, push
+
+## Identité git
+
+- GitHub user : **Meuleur**
+- Email : mathis34400@gmail.com
+- Tous les commits doivent partir avec cette identité pour compter dans le graphe de contribs.
+
+## Outils requis (sur la machine)
+
+- `git` (déjà installé)
+- `gh` (GitHub CLI, authentifié — `gh auth status` doit dire `Logged in`)
+- `python` 3.11+ et `pip`
+- `node` 20+ et `npm` (pour Claude Code)
 
 ## Conventions techniques
 
-**Python** (par défaut pour les projets ML) :
+**Python** (par défaut) :
 - Version 3.11+
-- Formatter : `black` (line length 100)
-- Imports : `isort`
-- Linting : `ruff`
+- Format : `black` (line length 100), `isort`
+- Lint : `ruff`
 - Tests : `pytest`
-- Type hints partout où c'est raisonnable
-- Docstrings style Google ou NumPy, en français OK
+- Type hints partout où raisonnable
+- Docstrings Google/NumPy style, OK en français
 
-**JavaScript / TypeScript** (pour les API et frontends légers) :
-- Préférer TypeScript dès qu'il y a >50 lignes
+**JS/TS** (pour API et frontends légers) :
+- TS dès > 50 lignes
 - Tests : `vitest`
-- Formatter : `prettier`
+- Format : `prettier`
 
-**Structure type d'un projet** :
+**Structure type d'un projet (chaque repo)** :
 ```
-projects/<nom>/
+<slug>/
   README.md          # but, install, usage
   requirements.txt   # ou pyproject.toml
   src/               # code source
   tests/             # tests pytest
   data/              # ignoré par git si lourd
-  notebooks/         # exploration (optionnel)
+  notebooks/         # optionnel
+  .gitignore         # copié depuis le repo de contrôle
 ```
 
 ## Conventions Git
 
 - Branche principale : `main`
-- Messages : **Conventional Commits en anglais**
-  - `feat(<projet>): ...` pour une nouvelle feature
-  - `fix(<projet>): ...` pour un bug
-  - `refactor(<projet>): ...`, `docs(<projet>): ...`, `test(<projet>): ...`, `chore: ...`
-- Un commit = un changement cohérent. Pas de commit-fourre-tout.
+- **Conventional Commits en anglais** :
+  - `feat(<slug>): ...` nouvelle feature
+  - `fix(<slug>): ...` bug
+  - `refactor(<slug>): ...`, `docs(<slug>): ...`, `test(<slug>): ...`, `chore: ...`, `perf(<slug>): ...`
+- Un commit = un changement cohérent
+- Le `<slug>` dans le commit = nom du projet/repo
 
-## Choses à **ne jamais** faire
+## À ne jamais faire
 
-- Commit des secrets / clés API / fichiers `.env`
-- Commit de modèles lourds (`*.pt`, `*.h5`, `*.bin` > 50 Mo) → utiliser Git LFS si vraiment besoin, sinon documenter comment télécharger
-- Commit de notebooks avec outputs lourds → `jupyter nbconvert --clear-output` avant
-- Pusher sur `main` sans avoir tourné les tests
-- Inventer des résultats de benchmark sans avoir lancé le code
-- Laisser du code mort, des TODOs vagues, ou des `print()` de debug
-
-## Quand tu ne sais pas
-
-- **Pose-moi la question.** Mieux vaut une question que un mauvais choix de stack.
-- Si je ne suis pas dispo et qu'il faut trancher, choisis l'option la plus **standard** et **bien documentée** dans l'écosystème, pas la plus exotique.
+- Commit de secrets (`.env`, `*.key`, `*.pem`)
+- Commit de modèles lourds (`*.pt`, `*.h5`, `*.bin` > 50 MB) → utiliser HF Hub ou Git LFS si vraiment nécessaire
+- Notebooks avec gros outputs → `jupyter nbconvert --clear-output` avant
+- `git push --force` ou `gh repo delete`
+- Code mort, TODOs vagues, `print()` de debug
+- Inventer des chiffres de benchmark
 
 ## Stack préférée par domaine
 
-- NLP : Hugging Face Transformers, sentence-transformers, spaCy
+- LLM / NLP : Hugging Face Transformers, peft, trl, sentence-transformers, datasets
+- Quantization : bitsandbytes, optimum, llama.cpp (GGUF)
 - Vision : PyTorch + torchvision, timm
-- Series temporelles : statsmodels, prophet, neuralforecast
+- ML classique : scikit-learn pour la référence, mais on **réimplemente from-scratch** quand c'est pédagogique
 - Vector DB : chromadb (local), pgvector (prod)
 - LLM local : Ollama, llama.cpp
 - API : FastAPI
-- Frontend léger : Streamlit ou Gradio (pour les démos), sinon HTML+htmx
+- Frontend léger : Streamlit ou Gradio
+
+## Quand tu ne sais pas
+
+Pose la question. Mieux vaut une question qu'un mauvais choix de stack. Si je suis indisponible, choisis l'option **standard** et **bien documentée**, pas la plus exotique.
+
+## Performance attendue de /go
+
+- Une session enchaîne **5 tâches** par défaut
+- Chaque tâche = un commit dans le repo du projet
+- À la fin, un commit dans le repo de contrôle pour cocher les tâches
+- 6 push max par session : 5 dans le projet (en fait un seul push final dans le projet) + 1 dans le contrôle
+- Si Claude finit un projet entier (toutes les cases cochées), il s'arrête sans démarrer le suivant

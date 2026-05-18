@@ -1,90 +1,190 @@
 ---
-description: Avance d'un cran sur le projet du jour (analyse → implémentation → commit → push)
-allowed-tools: Bash(git:*), Bash(gh:*), Bash(python:*), Bash(pip:*), Bash(pytest:*), Bash(npm:*), Bash(node:*), Read, Write, Edit, Glob, Grep, WebFetch
+description: Mode multi-repo — crée/ouvre le repo du projet actif, enchaîne 5 tâches avec commit par tâche, push à la fin
+allowed-tools: Bash(git:*), Bash(gh:*), Bash(cd:*), Bash(python:*), Bash(python3:*), Bash(pip:*), Bash(pip3:*), Bash(pytest:*), Bash(npm:*), Bash(node:*), Bash(npx:*), Bash(ls:*), Bash(cat:*), Bash(mkdir:*), Bash(touch:*), Bash(cp:*), Bash(mv:*), Bash(find:*), Bash(echo:*), Bash(pwd), Bash(test:*), Bash(grep:*), Read, Write, Edit, Glob, Grep, WebFetch
 ---
 
-# Commande /go — contribution quotidienne
+# Commande /go — mode multi-repo
 
-Tu es chargé de faire **avancer d'un cran** mes projets d'IA. Une seule règle d'or : **chaque commit doit avoir une vraie valeur ajoutée**. Pas de commit vide, pas de "fix typo" pour la forme, pas de fichier généré pour rien.
+Tu travailles avec un **monorepo de contrôle** (ce repo, `Meuleur/AIproject`, qui contient `ROADMAP.md`) et **un repo GitHub dédié par projet** (ex : `Meuleur/lora-lab`, `Meuleur/nano-llm-fr`). Tous les repos vivent en parallèle dans `~/Desktop/Dev/`.
 
-## 1. État des lieux (max 60 sec)
+Une session `/go` enchaîne **5 tâches**, fait **un commit par tâche dans le bon repo**, met à jour le ROADMAP dans le repo de contrôle, et push tout.
 
-Exécute en parallèle :
-
-```bash
-git status
-git log --oneline -10
-git branch --show-current
-```
-
-Puis lis `ROADMAP.md` à la racine. Repère :
-- Le **projet actif** (premier projet non terminé)
-- La **prochaine tâche non cochée** (`- [ ]`) de ce projet
-
-S'il n'y a pas de ROADMAP.md, ou si tous les projets sont terminés, **arrête-toi** et demande-moi quoi faire.
-
-## 2. Choix de la tâche
-
-Prends la **prochaine tâche non cochée** du projet actif. **N'en prends qu'UNE seule** — l'objectif est un commit par jour, pas une session de 4h.
-
-Si la tâche te semble trop grosse pour tenir dans une seule session honnête (>~150 lignes de code utiles), découpe-la en sous-tâches dans le ROADMAP et ne fais que la première.
-
-## 3. Implémentation
-
-- Code propre, lisible, commenté en français là où c'est utile
-- **Toujours** au moins un test unitaire si tu ajoutes une fonction (pytest pour Python, vitest/jest pour JS)
-- Si tu ajoutes une dépendance, mets-la dans `requirements.txt` / `package.json`
-- Si le projet n'existe pas encore physiquement, crée son dossier `projects/<nom-du-projet>/` avec un `README.md` minimal qui explique son but
-- Pas de code "à compléter plus tard", pas de TODO en pagaille — termine ce que tu commences
-
-## 4. Vérification avant commit
+## 0. Sanity check (max 10 sec)
 
 ```bash
-# Lance les tests si présents
-pytest projects/<nom-du-projet>/ -q 2>/dev/null || true
+gh auth status 2>&1 | head -5    # gh authentifié ?
+git config user.name             # identité git ok ?
+pwd                              # on est bien dans ~/Desktop/Dev/ai-projects-starter ?
 ```
 
-Si des tests échouent à cause de ton changement : **corrige avant de commiter**. Si tu n'arrives pas à corriger, n'invente rien — reverte et raconte-moi pourquoi.
+Si `gh` n'est pas authentifié → **stop**, dis-moi de lancer `gh auth login`.
+Si l'identité git n'est pas configurée → **stop**, dis-moi `git config user.email "mathis34400@gmail.com"`.
 
-## 5. Commit + push
+## 1. Lecture du ROADMAP
 
-Convention de commit : **Conventional Commits en anglais**.
+```bash
+cat ROADMAP.md | head -100
+```
+
+Repère le **premier projet** dont le statut est `in progress` ou `not started` (dans l'ordre du fichier) ET qui a encore des tâches `- [ ]`.
+
+Note ses métadonnées :
+- **slug** (nom du repo, ex: `lora-lab`)
+- **chemin local** (ex: `~/Desktop/Dev/lora-lab`)
+- **statut**
+- **5 premières tâches non cochées**
+
+## 2. Préparer le repo de projet (idempotent)
+
+### Cas A — Le projet est `Meuleur/AIproject` lui-même (sentiment-analyzer legacy)
+
+Tu travailles directement dans le repo courant, dans `projects/sentiment-analyzer/`. Pas de création de repo.
+
+### Cas B — C'est un projet dédié, premier passage
+
+```bash
+SLUG=<slug>
+LOCAL="$HOME/Desktop/Dev/$SLUG"
+
+if [ ! -d "$LOCAL" ]; then
+  # Vérifie si le repo GitHub existe déjà
+  if gh repo view "Meuleur/$SLUG" >/dev/null 2>&1; then
+    # Existe déjà → clone
+    gh repo clone "Meuleur/$SLUG" "$LOCAL"
+  else
+    # N'existe pas → crée puis clone (public, sans README initial)
+    gh repo create "Meuleur/$SLUG" --public --description "$SLUG — part of Meuleur/AIproject portfolio" --clone --add-readme=false || \
+    gh repo create "Meuleur/$SLUG" --public --description "$SLUG — part of Meuleur/AIproject portfolio"
+    # Si --clone n'a pas créé le dossier (cas vieilles versions de gh), clone manuellement
+    if [ ! -d "$LOCAL" ]; then
+      cd "$HOME/Desktop/Dev"
+      gh repo clone "Meuleur/$SLUG"
+    fi
+  fi
+fi
+```
+
+Si le dossier local est vide (vient d'être créé), initialise une structure minimale **avant** la première tâche :
+
+```bash
+cd "$LOCAL"
+[ -f README.md ] || cat > README.md << 'EOF'
+# <slug>
+
+<une-phrase-sur-le-projet>
+
+Part of [Meuleur/AIproject](https://github.com/Meuleur/AIproject).
+EOF
+[ -f .gitignore ] || cp "$HOME/Desktop/Dev/ai-projects-starter/.gitignore" .gitignore
+mkdir -p src tests
+[ -f requirements.txt ] || touch requirements.txt
+```
+
+Et commit ce bootstrap **en premier** (compte comme la première tâche "Bootstrap repo") :
 
 ```bash
 git add -A
-git commit -m "feat(<projet>): <résumé court de l'apport>" -m "<2-3 lignes de contexte si utile>"
+git commit -m "chore: bootstrap <slug> project structure"
+git push -u origin main 2>/dev/null || git push -u origin master 2>/dev/null || (git branch -M main && git push -u origin main)
+```
+
+### Cas C — Le repo existe déjà localement
+
+```bash
+cd "$LOCAL"
+git pull --rebase --autostash 2>&1 | tail -5
+```
+
+## 3. Boucle d'exécution (5 tâches max)
+
+Pour chaque tâche, dans l'ordre du ROADMAP, **dans le repo de projet** (pas le repo de contrôle) :
+
+### a. Implémente
+
+- Code propre, lisible
+- Test pytest pour toute fonction non triviale
+- Ajoute les deps à `requirements.txt` (ne `pip install` que si tu en as besoin pour vérifier le code, et si ça prend < 30 sec)
+- Pas de TODO vague, termine
+
+### b. Vérifie
+
+```bash
+[ -f pytest.ini ] || [ -d tests ] && pytest -q 2>&1 | tail -10 || true
+```
+
+Tests rouges à cause de ton changement → corrige avant de commiter.
+
+### c. Commit dans le repo de projet
+
+```bash
+git add -A
+git commit -m "<type>(<slug>): <résumé court>"
+```
+
+Conventional Commits, anglais. `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `perf`.
+
+### d. Coche la tâche dans le ROADMAP DU REPO DE CONTRÔLE
+
+```bash
+cd "$HOME/Desktop/Dev/ai-projects-starter"
+# Remplace `- [ ] <description>` par `- [x] <description>` (avec Edit tool, plus précis)
+cd "$LOCAL"
+```
+
+Tu ne commits pas le ROADMAP à chaque tâche — tu fais un seul commit ROADMAP groupé à la fin (étape 4).
+
+### e. Tâche suivante
+
+Pas de récap, pas de pause. Tu enchaînes.
+
+## 4. Finalisation
+
+### a. Push le repo de projet
+
+```bash
+cd "$LOCAL"
 git push
 ```
 
-Exemples valides :
-- `feat(sentiment-analyzer): add tokenizer with French stopwords`
-- `test(rag-chatbot): cover empty-context edge case`
-- `refactor(image-classifier): extract data augmentation into separate module`
-- `docs(agent-framework): document the tool registry API`
+Si rebase nécessaire : `git pull --rebase && git push`.
 
-**Ne commit jamais** :
-- des fichiers `.env`, des clés API, des modèles `.pt`/`.h5` lourds
-- des artefacts générés (`__pycache__/`, `node_modules/`, `.DS_Store`)
-- du code mort ou commenté "au cas où"
+### b. Commit + push le ROADMAP mis à jour dans le repo de contrôle
 
-Assure-toi qu'un `.gitignore` raisonnable existe ; sinon ajoute-le dans le même commit.
-
-## 6. Mise à jour du ROADMAP
-
-Coche la tâche que tu viens de finir dans `ROADMAP.md` (`- [x]`) et inclus cette mise à jour dans le **même commit**.
-
-Si tu as découvert en chemin des sous-tâches utiles, ajoute-les sous la tâche courante.
-
-## 7. Compte-rendu
-
-Termine ta réponse par un bloc court de la forme :
-
-```
-Projet     : <nom>
-Tache      : <ce que tu as fait>
-Commit     : <hash court> — <message>
-Tests      : <X passed / Y failed / aucun>
-Suivant    : <prochaine tache du roadmap>
+```bash
+cd "$HOME/Desktop/Dev/ai-projects-starter"
+git add ROADMAP.md
+git commit -m "chore(roadmap): mark N tasks done in <slug>"
+git push
 ```
 
-C'est tout. Pas d'enrobage marketing, pas de "j'espère que ça aide". Du concret.
+### c. Mise à jour du statut
+
+Si toutes les tâches du projet sont cochées, change son **statut** dans ROADMAP.md à `done` (dans le même commit que ci-dessus).
+Si tu viens de démarrer un projet, change son statut de `not started` à `in progress`.
+
+## 5. Règles non négociables
+
+- **Aucun commit vide ou cosmétique** : si une "tâche" est triviale au point de ne rien changer, saute-la et coche-la quand même.
+- **Aucun secret commité** (`.env`, `*.key`, modèles `> 50MB`).
+- **Pas de force push**.
+- **Pas de `gh repo delete` ni `git push --force`**.
+- Si une tâche nécessite un GPU et que tu n'en as pas accès : marque-la `<!-- needs GPU -->` dans le ROADMAP, saute-la, passe à la suivante.
+
+## 6. Compte-rendu final
+
+Une seule fois, à la toute fin :
+
+```
+Session     : <date>
+Projet      : <slug> (https://github.com/Meuleur/<slug>)
+Tâches      : <N> terminées
+Commits     :
+  - <hash> <message>
+  - <hash> <message>
+  ...
+Tests       : <X passed / Y failed / aucun>
+Push        : OK projet + OK contrôle
+Prochaine   : <prochaine tâche du roadmap>
+```
+
+C'est tout. Pas de blabla.

@@ -1,127 +1,314 @@
-# ROADMAP — Projets IA
+# ROADMAP — Portfolio ML / LLM fine-tuning
 
-> Un monorepo de projets IA construits incrémentalement. Chaque tâche non cochée représente environ une session journaliere de `/go`. Les projets sont rangés du plus simple au plus avancé : on termine (ou stabilise) un projet avant d'attaquer le suivant.
+> **Repo de contrôle** : ce fichier vit dans `Meuleur/AIproject`. Il orchestre tous mes projets ML.
+> **Architecture** : un repo GitHub par projet (multi-repo). Les commits sont distribués sur des dizaines de repos publics.
+>
+> **GitHub user** : `Meuleur`
+> **Racine locale** : `~/Desktop/Dev/`
+
+## Convention multi-repo
+
+Chaque projet a un bloc de métadonnées suivi de ses tâches :
+
+```
+### Projet N — <slug>
+- **Repo**   : Meuleur/<slug>
+- **Local**  : ~/Desktop/Dev/<slug>
+- **Statut** : not started | in progress | done
+
+- [ ] tâche 1
+- [ ] tâche 2
+```
+
+Le slug est exactement le nom du repo GitHub. Quand `/go` rencontre un projet `not started`, il crée le repo GitHub (`gh repo create Meuleur/<slug> --public --clone`) et le clone à côté du repo de contrôle.
 
 ---
 
-## Projet 1 — `sentiment-analyzer` (analyseur de sentiments FR)
+## Legacy (à terminer ou migrer)
 
-Classifier des phrases françaises en positif / négatif / neutre, du baseline jusqu'à un modèle transformer fine-tuné.
+### Projet 0 — `sentiment-analyzer` (déjà bootstrap dans ce repo, à migrer)
+- **Repo**   : Meuleur/AIproject (actuellement, dans `projects/sentiment-analyzer/`)
+- **Local**  : `projects/sentiment-analyzer/` (dans ce même repo de contrôle)
+- **Statut** : in progress
+- **Note**   : à migrer vers son propre repo `Meuleur/sentiment-analyzer` quand `/go` arrive sur ce projet. Le commit de migration sera : `chore: extract sentiment-analyzer to dedicated repo`.
 
-- [x] Bootstrap : créer `projects/sentiment-analyzer/`, README, structure de dossiers (`data/`, `src/`, `tests/`), `requirements.txt` minimal
-- [ ] Charger un dataset français (Allociné review subset ou équivalent) — script `src/load_data.py` + test
-- [ ] Préprocessing : nettoyage texte, normalisation accents, tokenisation simple
-- [ ] Baseline TF-IDF + Logistic Regression — `src/baseline.py` + métriques (accuracy, F1)
-- [ ] Sauvegarde / chargement du modèle baseline (pickle ou joblib)
-- [ ] CLI simple : `python -m src.predict "j'ai adoré ce film"` → label
-- [ ] Ajouter un word embedding moyen (fastText FR) comme deuxième baseline
-- [ ] Fine-tuning d'un modèle Hugging Face (camembert-base) sur le même dataset
-- [ ] Comparer les 3 approches dans un `BENCHMARK.md` (tableaux, courbes)
-- [ ] Wrapper FastAPI : POST `/predict` → JSON
-- [ ] Dockerfile + test que le conteneur démarre
-- [ ] README final avec exemples d'usage, limites, idées d'amélioration
+- [x] Bootstrap (structure dossier + README + smoke test)
+- [ ] Migrer le projet vers `Meuleur/sentiment-analyzer` (extraire `projects/sentiment-analyzer/` → nouveau repo)
+- [ ] Loader Allociné review subset depuis HuggingFace + test
+- [ ] Preprocessing FR (nettoyage, normalisation accents)
+- [ ] Tokenisation BPE Hugging Face
+- [ ] Baseline TF-IDF + LogReg + métriques
+- [ ] Fine-tuning Camembert-base avec `transformers.Trainer`
+- [ ] LoRA sur Camembert via peft
+- [ ] QLoRA (bnb-4bit) sur Camembert
+- [ ] BENCHMARK.md (4 approches comparées)
+- [ ] CLI d'inférence
 
-## Projet 2 — `rag-chatbot` (chatbot RAG sur tes propres docs)
+---
 
-Un chatbot qui répond à partir d'une base de documents (PDF, MD, TXT). Architecture RAG classique.
+## Projets phares — fine-tuning de petits LM
 
-- [ ] Bootstrap `projects/rag-chatbot/` + README + structure
-- [ ] Loader de documents (PDF via pypdf, MD, TXT) → liste de chunks
-- [ ] Chunking : sliding window avec overlap, paramétrable
-- [ ] Embeddings : `sentence-transformers` (modèle multilingue) + cache local
-- [ ] Vector store : chromadb en local, persisté sur disque
-- [ ] Recherche top-k avec score de similarité
-- [ ] Prompt template pour grounding (réponds uniquement à partir du contexte fourni)
-- [ ] Wrapper LLM : interface abstraite + implémentation Ollama (local, gratuit)
-- [ ] CLI interactive : `python -m src.chat`
-- [ ] Évaluation simple : 10 Q/R préparées + comparaison sortie/attendu
-- [ ] Streaming des réponses dans la CLI
-- [ ] Interface Gradio ou Streamlit basique
-- [ ] README + démo (screenshot ou GIF)
+### Projet 1 — `lora-lab`
+- **Repo**   : Meuleur/lora-lab
+- **Local**  : ~/Desktop/Dev/lora-lab
+- **Statut** : not started
 
-## Projet 3 — `image-classifier` (vision : classification d'images)
+- [ ] Bootstrap repo (README, requirements.txt, structure src/tests/runs)
+- [ ] Loader unifié de datasets instruct (Alpaca-FR, OpenAssistant-FR)
+- [ ] Script paramétrable de fine-tuning LoRA avec `trl.SFTTrainer`
+- [ ] Run LoRA sur TinyLlama-1.1B (r=8, alpha=16)
+- [ ] Run LoRA sur Qwen2.5-0.5B
+- [ ] Run LoRA sur Qwen2.5-1.5B
+- [ ] Run LoRA sur Phi-3-mini
+- [ ] Variante QLoRA (bnb-4bit) sur les 4 modèles
+- [ ] Sweep r ∈ {4, 8, 16, 32}
+- [ ] Sweep alpha ∈ {8, 16, 32, 64}
+- [ ] LoRA sur attention only vs attention + MLP
+- [ ] Merge LoRA → modèle standalone + sauvegarde
+- [ ] Export GGUF (llama.cpp)
+- [ ] BENCHMARK.md complet
+- [ ] README de recommandations pratiques
 
-Classifier des images dans plusieurs catégories. Du zéro au transfer learning.
+### Projet 2 — `preference-tuning`
+- **Repo**   : Meuleur/preference-tuning
+- **Local**  : ~/Desktop/Dev/preference-tuning
+- **Statut** : not started
 
-- [ ] Bootstrap `projects/image-classifier/`
-- [ ] Dataset : CIFAR-10 ou Fashion-MNIST (téléchargement automatique)
-- [ ] Data loader PyTorch + transforms (resize, normalisation)
-- [ ] Petit CNN from scratch (3 conv blocks) → train 5 epochs, log loss/accuracy
-- [ ] Sauvegarde du modèle + script d'inférence sur une image
-- [ ] Data augmentation (flip, rotation, color jitter) — comparer avant/après
-- [ ] Transfer learning depuis ResNet18 pré-entraîné
-- [ ] Comparer CNN custom vs ResNet18 dans un BENCHMARK.md
-- [ ] Grad-CAM pour visualiser ce que le modèle regarde
-- [ ] Mini-API FastAPI : POST une image → label + confiance
-- [ ] Frontend HTML minimal pour uploader une image et voir le résultat
-- [ ] README final
+- [ ] Bootstrap repo
+- [ ] Loader de dataset de préférences (Anthropic HH ou Argilla DPO-mix-FR)
+- [ ] Format chosen/rejected
+- [ ] DPO via `trl.DPOTrainer` sur Qwen2.5-0.5B-SFT
+- [ ] Évaluation win-rate vs modèle SFT
+- [ ] ORPO via `trl.ORPOTrainer`
+- [ ] DPO vs ORPO (qualité, temps, VRAM)
+- [ ] Variante KTO
+- [ ] DPO + LoRA vs DPO full
+- [ ] BENCHMARK.md + README
 
-## Projet 4 — `time-series-forecaster` (prédiction de séries temporelles)
+### Projet 3 — `nano-llm-fr`
+- **Repo**   : Meuleur/nano-llm-fr
+- **Local**  : ~/Desktop/Dev/nano-llm-fr
+- **Statut** : not started
 
-Prédire des séries temporelles (cours boursier, météo, ventes) avec plusieurs approches.
+- [ ] Bootstrap repo
+- [ ] Tokenizer BPE entraîné from scratch sur sous-corpus FR
+- [ ] Multi-head attention from scratch (sans `nn.MultiheadAttention`)
+- [ ] Transformer block (pre-norm, FFN, residuals)
+- [ ] Embeddings + positional sinusoïdal
+- [ ] Modèle complet ~10M params + test shapes
+- [ ] DataLoader streaming sur Wikipedia FR
+- [ ] Training loop (mixed precision, grad accumulation, checkpoints)
+- [ ] Run d'entraînement (~100M tokens) + log courbes
+- [ ] Sampling : greedy, top-k, top-p, temperature
+- [ ] Variante RoPE
+- [ ] Variante GQA
+- [ ] Variante SwiGLU
+- [ ] Notebook `analysis.ipynb` (visualisation attention heads)
+- [ ] README + courbes
 
-- [ ] Bootstrap projet
-- [ ] Chargement d'un dataset publi (e.g. yfinance pour le BTC ou un dataset Kaggle météo)
-- [ ] EDA : décomposition tendance/saisonnalité, autocorrélation, visualisations
-- [ ] Baseline naïve (valeur précédente, moyenne mobile)
-- [ ] ARIMA / SARIMA via statsmodels
-- [ ] LSTM PyTorch
-- [ ] Prophet de Meta
-- [ ] N-BEATS ou Temporal Fusion Transformer
-- [ ] Comparatif des 5 approches sur les mêmes métriques (MAE, RMSE, MAPE)
-- [ ] Backtest walk-forward
-- [ ] Notebook explicatif `analysis.ipynb`
+### Projet 4 — `distillation-pipeline`
+- **Repo**   : Meuleur/distillation-pipeline
+- **Local**  : ~/Desktop/Dev/distillation-pipeline
+- **Statut** : not started
+
+- [ ] Bootstrap repo
+- [ ] Setup teacher (Mistral-7B-Instruct) + student (Qwen2.5-0.5B)
+- [ ] Loss KL + cross-entropy hard
+- [ ] Temperature scaling
+- [ ] Training loop mixed precision
+- [ ] Évaluation student vs SFT-classique vs teacher
+- [ ] Variante top-k distillation (économie VRAM)
+- [ ] BENCHMARK.md + README
+
+### Projet 5 — `quantization-bench`
+- **Repo**   : Meuleur/quantization-bench
+- **Local**  : ~/Desktop/Dev/quantization-bench
+- **Statut** : not started
+
+- [ ] Bootstrap repo
+- [ ] Modèle de réf : Qwen2.5-1.5B-Instruct fp16
+- [ ] Quantize bnb-8bit + bnb-4bit
+- [ ] Quantize GPTQ-4bit (optimum)
+- [ ] Quantize AWQ-4bit
+- [ ] Convert GGUF (Q4_K_M, Q5_K_M, Q8_0)
+- [ ] Mesures : taille, VRAM peak, tokens/s, perplexity wikitext-fr
+- [ ] Évaluation qualitative 20 prompts
+- [ ] BENCHMARK.md
 - [ ] README
 
-## Projet 5 — `mini-agent-framework` (framework d'agents minimaliste)
+### Projet 6 — `mini-evals`
+- **Repo**   : Meuleur/mini-evals
+- **Local**  : ~/Desktop/Dev/mini-evals
+- **Statut** : not started
 
-Un framework d'agents LLM en moins de 1000 lignes : tool use, mémoire, planification simple.
-
-- [ ] Bootstrap projet
-- [ ] Interface `Tool` (description, schéma d'args, exécution)
-- [ ] Registry de tools + résolution par nom
-- [ ] Tools de base : `read_file`, `write_file`, `run_python`, `web_search` (stub d'abord)
-- [ ] Boucle agent : LLM call → parse tool call → execute → feedback
-- [ ] Mémoire courte (historique de la conversation) + truncation par tokens
-- [ ] Mémoire longue (vector store, réutilise le code de rag-chatbot)
-- [ ] Planification : décomposition d'une tâche en sous-tâches avant exécution
-- [ ] Tracing : log structuré de chaque étape pour debug
-- [ ] CLI : `python -m src.agent "écris un fichier qui calcule Fibonacci"`
-- [ ] Tests d'intégration sur 3 tâches simples
-- [ ] Doc d'archi dans `ARCHITECTURE.md`
-- [ ] README + exemples
-
-## Projet 6 — `llm-fine-tuner` (fine-tuning LLM avec LoRA)
-
-Pipeline complet pour fine-tuner un petit LLM avec LoRA/QLoRA sur un dataset custom.
-
-- [ ] Bootstrap projet
-- [ ] Génération d'un petit dataset instruct (Q/R en français, JSON-lines)
-- [ ] Loader du dataset + split train/eval
-- [ ] Tokenisation + formatage en chat template
-- [ ] Setup LoRA via peft sur un modèle 1B-3B (TinyLlama, Phi-3-mini)
-- [ ] Boucle de training avec `accelerate` ou `trl`
-- [ ] Évaluation : perplexity + 5 prompts qualitatifs
-- [ ] Export et merge des poids LoRA → modèle final
-- [ ] Quantization GGUF pour inférence locale (llama.cpp)
-- [ ] Script d'inférence simple
-- [ ] README + benchmarks before/after
+- [ ] Bootstrap repo
+- [ ] Architecture : Task / Runner / Reporter
+- [ ] Task MMLU-mini (100 questions)
+- [ ] Task ARC-easy-mini
+- [ ] Task HellaSwag-mini
+- [ ] Task French-QA-mini (50 questions custom)
+- [ ] Task HumanEval-mini (10 problèmes code)
+- [ ] Runner avec batching + resume
+- [ ] Reporter JSON + Markdown
+- [ ] Vue comparative multi-modèles
+- [ ] CLI
+- [ ] README
 
 ---
 
-## Projets « bonus » (quand les 6 premiers sont stables)
+## Implémentations from-scratch
 
-- `recommender-system` — recos films/livres, collaborative filtering puis hybride
-- `audio-classifier` — classifier des sons (ESC-50), spectrogrammes + CNN
-- `gan-toy` — DCGAN sur MNIST pour comprendre les GANs
-- `diffusion-from-scratch` — implémenter un mini-DDPM pédagogique
-- `multi-modal-search` — recherche texte ↔ image avec CLIP
-- `reinforcement-learning-cartpole` — DQN puis PPO sur CartPole / LunarLander
+### Projet 7 — `transformer-from-scratch`
+- **Repo**   : Meuleur/transformer-from-scratch
+- **Local**  : ~/Desktop/Dev/transformer-from-scratch
+- **Statut** : not started
+
+- [ ] Bootstrap repo
+- [ ] Scaled dot-product attention + test
+- [ ] Multi-head attention + test
+- [ ] FFN position-wise + test
+- [ ] Layer norm manuel + test d'équivalence avec `nn.LayerNorm`
+- [ ] Residual + dropout
+- [ ] Encoder block
+- [ ] Decoder block (masked attention + cross attention)
+- [ ] Positional sinusoïdal
+- [ ] RoPE
+- [ ] ALiBi
+- [ ] Tests d'équivalence numérique avec HF
+- [ ] Mini-training tâche jouet (reverse string)
+- [ ] README pédagogique avec équations
+
+### Projet 8 — `tokenizer-bpe-from-scratch`
+- **Repo**   : Meuleur/tokenizer-bpe-from-scratch
+- **Local**  : ~/Desktop/Dev/tokenizer-bpe-from-scratch
+- **Statut** : not started
+
+- [ ] Bootstrap repo
+- [ ] BPE training (count pairs, merge, vocab)
+- [ ] Encode / decode
+- [ ] Comparaison output avec `tokenizers.ByteLevelBPETokenizer`
+- [ ] Variante byte-level
+- [ ] CLI d'entraînement
+- [ ] README
+
+### Projet 9 — `decoding-strategies`
+- **Repo**   : Meuleur/decoding-strategies
+- **Local**  : ~/Desktop/Dev/decoding-strategies
+- **Statut** : not started
+
+- [ ] Bootstrap repo
+- [ ] KV cache manuel
+- [ ] Greedy
+- [ ] Beam search (k=2, 4, 8)
+- [ ] Top-k
+- [ ] Top-p (nucleus)
+- [ ] Temperature
+- [ ] Min-p
+- [ ] Speculative decoding
+- [ ] Bench vitesse avec/sans KV cache
+- [ ] README
+
+### Projet 10 — `mini-moe`
+- **Repo**   : Meuleur/mini-moe
+- **Local**  : ~/Desktop/Dev/mini-moe
+- **Statut** : not started
+
+- [ ] Bootstrap repo
+- [ ] Router top-2
+- [ ] Experts FFN
+- [ ] Load balancing loss
+- [ ] Intégration dans mini-transformer
+- [ ] Comparaison MoE vs dense même budget
+- [ ] README
 
 ---
 
-## Convention
+## ML classique from-scratch
 
-- Une coche `[x]` = tâche réellement terminée et committée
-- On ne saute pas de tâche sans raison — si une étape devient inutile, on la supprime explicitement avec un commit
-- Si une tâche est trop grosse, on la **scinde** en sous-tâches sous la tâche d'origine
+### Projet 11 — `ml-from-scratch`
+- **Repo**   : Meuleur/ml-from-scratch
+- **Local**  : ~/Desktop/Dev/ml-from-scratch
+- **Statut** : not started
+
+- [ ] Bootstrap repo
+- [ ] linear_regression.py (normal eq + GD) + test
+- [ ] logistic_regression.py (binaire + softmax) + test
+- [ ] knn.py (+ KD-tree) + test
+- [ ] k_means.py (Lloyd + k-means++) + test
+- [ ] gmm.py (EM) + test
+- [ ] pca.py (eig + SVD) + test
+- [ ] decision_tree.py (ID3 + CART) + test
+- [ ] random_forest.py (bagging) + test
+- [ ] gradient_boosting.py (GBM régression) + test
+- [ ] naive_bayes.py (gaussien + multinomial) + test
+- [ ] svm.py (SMO + kernels) + test
+- [ ] neural_net.py (MLP backprop numpy) + test
+- [ ] hmm.py (Forward, Viterbi, Baum-Welch) + test
+- [ ] lda.py + test
+- [ ] tsne.py + test
+- [ ] optimizers.py (SGD, Adam, AdamW, etc.) + comparaisons
+- [ ] notebook comparison.ipynb
+
+---
+
+## Outils CLI
+
+### Projet 12 — `llm-eval-cli`
+- **Repo**   : Meuleur/llm-eval-cli
+- **Local**  : ~/Desktop/Dev/llm-eval-cli
+- **Statut** : not started
+
+- [ ] Bootstrap repo
+- [ ] Wrapper léger autour de `lm-evaluation-harness`
+- [ ] Config YAML
+- [ ] Export Markdown
+- [ ] Comparaison multi-modèles
+
+### Projet 13 — `dataset-dedup`
+- **Repo**   : Meuleur/dataset-dedup
+- **Local**  : ~/Desktop/Dev/dataset-dedup
+- **Statut** : not started
+
+- [ ] Bootstrap repo
+- [ ] Dédup exacte par hash
+- [ ] MinHash + LSH
+- [ ] CLI
+
+### Projet 14 — `tokenizer-compare`
+- **Repo**   : Meuleur/tokenizer-compare
+- **Local**  : ~/Desktop/Dev/tokenizer-compare
+- **Statut** : not started
+
+- [ ] Bootstrap repo
+- [ ] Compare N tokenizers sur même texte
+- [ ] Métriques : nb tokens, bytes/token, longest
+- [ ] Visualisation HTML
+
+### Projet 15 — `inference-bench`
+- **Repo**   : Meuleur/inference-bench
+- **Local**  : ~/Desktop/Dev/inference-bench
+- **Statut** : not started
+
+- [ ] Bootstrap repo
+- [ ] Bench tokens/s, TTFT, VRAM
+- [ ] Backends : transformers, vLLM (subprocess), llama.cpp
+- [ ] Sortie CSV
+
+### Projet 16 — `model-card-generator`
+- **Repo**   : Meuleur/model-card-generator
+- **Local**  : ~/Desktop/Dev/model-card-generator
+- **Statut** : not started
+
+- [ ] Bootstrap repo
+- [ ] Lit run de fine-tuning + génère README HF-ready
+- [ ] Inclut metrics, dataset, hyperparams, hardware
+
+---
+
+## Convention de qualité (rappel)
+
+- Une coche `[x]` = tâche **réellement terminée + commit + push** sur le bon repo
+- Pas de commit cosmétique
+- Tests pour toute fonction non triviale
+- Pas de secrets, pas de modèles lourds (Git LFS si vraiment besoin)
+- Conventional Commits en anglais
