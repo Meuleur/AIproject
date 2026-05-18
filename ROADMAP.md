@@ -55,18 +55,18 @@ Le slug est exactement le nom du repo GitHub. Quand `/go` rencontre un projet `n
 - [x] Bootstrap repo (README, requirements.txt, structure src/tests/runs)
 - [x] Loader unifié de datasets instruct (Alpaca-FR, OpenAssistant-FR)
 - [x] Script paramétrable de fine-tuning LoRA avec `trl.SFTTrainer`
-- [ ] Run LoRA sur TinyLlama-1.1B (r=8, alpha=16) <!-- needs GPU -->
-- [ ] Run LoRA sur Qwen2.5-0.5B <!-- needs GPU -->
-- [ ] Run LoRA sur Qwen2.5-1.5B <!-- needs GPU -->
-- [ ] Run LoRA sur Phi-3-mini <!-- needs GPU -->
-- [ ] Variante QLoRA (bnb-4bit) sur les 4 modèles <!-- needs GPU -->
-- [ ] Sweep r ∈ {4, 8, 16, 32} <!-- needs GPU -->
-- [ ] Sweep alpha ∈ {8, 16, 32, 64} <!-- needs GPU -->
-- [ ] LoRA sur attention only vs attention + MLP <!-- needs GPU -->
+- [ ] Run LoRA sur TinyLlama-1.1B (r=8, alpha=16) <!-- MPS OK -->
+- [x] Run LoRA sur Qwen2.5-0.5B (100 steps MPS sur M1 Pro, voir lora-lab/BENCHMARK.md)
+- [ ] Run LoRA sur Qwen2.5-1.5B <!-- MPS OK (lent) -->
+- [ ] Run LoRA sur Phi-3-mini <!-- MPS OK (lent) -->
+- [ ] Variante QLoRA (bnb-4bit) sur les 4 modèles <!-- needs CUDA (bnb) -->
+- [ ] Sweep r ∈ {4, 8, 16, 32} <!-- MPS OK (lent) -->
+- [ ] Sweep alpha ∈ {8, 16, 32, 64} <!-- MPS OK (lent) -->
+- [ ] LoRA sur attention only vs attention + MLP <!-- MPS OK -->
 - [x] Merge LoRA → modèle standalone + sauvegarde
-- [ ] Export GGUF (llama.cpp) <!-- needs GPU (model merged d'abord) -->
-- [ ] BENCHMARK.md complet <!-- needs GPU (dépend des runs) -->
-- [ ] README de recommandations pratiques <!-- needs GPU (dépend des runs) -->
+- [ ] Export GGUF (llama.cpp)
+- [ ] BENCHMARK.md complet (en cours — 1 run réel dans `lora-lab/BENCHMARK.md`)
+- [ ] README de recommandations pratiques
 
 ### Projet 2 — `preference-tuning`
 - **Repo**   : Meuleur/preference-tuning
