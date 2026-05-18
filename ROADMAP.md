@@ -8,7 +8,7 @@
 
 Classifier des phrases françaises en positif / négatif / neutre, du baseline jusqu'à un modèle transformer fine-tuné.
 
-- [ ] Bootstrap : créer `projects/sentiment-analyzer/`, README, structure de dossiers (`data/`, `src/`, `tests/`), `requirements.txt` minimal
+- [x] Bootstrap : créer `projects/sentiment-analyzer/`, README, structure de dossiers (`data/`, `src/`, `tests/`), `requirements.txt` minimal
 - [ ] Charger un dataset français (Allociné review subset ou équivalent) — script `src/load_data.py` + test
 - [ ] Préprocessing : nettoyage texte, normalisation accents, tokenisation simple
 - [ ] Baseline TF-IDF + Logistic Regression — `src/baseline.py` + métriques (accuracy, F1)
