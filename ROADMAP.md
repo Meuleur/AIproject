@@ -37,11 +37,11 @@ Le slug est exactement le nom du repo GitHub. Quand `/go` rencontre un projet `n
 - [x] Preprocessing FR (nettoyage, normalisation accents)
 - [x] Tokenisation BPE Hugging Face
 - [x] Baseline TF-IDF + LogReg + métriques
-- [ ] Fine-tuning Camembert-base avec `transformers.Trainer`
-- [ ] LoRA sur Camembert via peft
-- [ ] QLoRA (bnb-4bit) sur Camembert
-- [ ] BENCHMARK.md (4 approches comparées)
-- [ ] CLI d'inférence
+- [ ] Fine-tuning Camembert-base avec `transformers.Trainer` <!-- needs GPU -->
+- [ ] LoRA sur Camembert via peft <!-- needs GPU -->
+- [ ] QLoRA (bnb-4bit) sur Camembert <!-- needs GPU -->
+- [ ] BENCHMARK.md (4 approches comparées) <!-- needs GPU (dépend des runs) -->
+- [x] CLI d'inférence
 
 ---
 
@@ -50,23 +50,23 @@ Le slug est exactement le nom du repo GitHub. Quand `/go` rencontre un projet `n
 ### Projet 1 — `lora-lab`
 - **Repo**   : Meuleur/lora-lab
 - **Local**  : ~/Desktop/Dev/lora-lab
-- **Statut** : not started
+- **Statut** : in progress
 
-- [ ] Bootstrap repo (README, requirements.txt, structure src/tests/runs)
-- [ ] Loader unifié de datasets instruct (Alpaca-FR, OpenAssistant-FR)
-- [ ] Script paramétrable de fine-tuning LoRA avec `trl.SFTTrainer`
-- [ ] Run LoRA sur TinyLlama-1.1B (r=8, alpha=16)
-- [ ] Run LoRA sur Qwen2.5-0.5B
-- [ ] Run LoRA sur Qwen2.5-1.5B
-- [ ] Run LoRA sur Phi-3-mini
-- [ ] Variante QLoRA (bnb-4bit) sur les 4 modèles
-- [ ] Sweep r ∈ {4, 8, 16, 32}
-- [ ] Sweep alpha ∈ {8, 16, 32, 64}
-- [ ] LoRA sur attention only vs attention + MLP
-- [ ] Merge LoRA → modèle standalone + sauvegarde
-- [ ] Export GGUF (llama.cpp)
-- [ ] BENCHMARK.md complet
-- [ ] README de recommandations pratiques
+- [x] Bootstrap repo (README, requirements.txt, structure src/tests/runs)
+- [x] Loader unifié de datasets instruct (Alpaca-FR, OpenAssistant-FR)
+- [x] Script paramétrable de fine-tuning LoRA avec `trl.SFTTrainer`
+- [ ] Run LoRA sur TinyLlama-1.1B (r=8, alpha=16) <!-- needs GPU -->
+- [ ] Run LoRA sur Qwen2.5-0.5B <!-- needs GPU -->
+- [ ] Run LoRA sur Qwen2.5-1.5B <!-- needs GPU -->
+- [ ] Run LoRA sur Phi-3-mini <!-- needs GPU -->
+- [ ] Variante QLoRA (bnb-4bit) sur les 4 modèles <!-- needs GPU -->
+- [ ] Sweep r ∈ {4, 8, 16, 32} <!-- needs GPU -->
+- [ ] Sweep alpha ∈ {8, 16, 32, 64} <!-- needs GPU -->
+- [ ] LoRA sur attention only vs attention + MLP <!-- needs GPU -->
+- [x] Merge LoRA → modèle standalone + sauvegarde
+- [ ] Export GGUF (llama.cpp) <!-- needs GPU (model merged d'abord) -->
+- [ ] BENCHMARK.md complet <!-- needs GPU (dépend des runs) -->
+- [ ] README de recommandations pratiques <!-- needs GPU (dépend des runs) -->
 
 ### Projet 2 — `preference-tuning`
 - **Repo**   : Meuleur/preference-tuning
