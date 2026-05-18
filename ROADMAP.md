@@ -26,18 +26,17 @@ Le slug est exactement le nom du repo GitHub. Quand `/go` rencontre un projet `n
 
 ## Legacy (à terminer ou migrer)
 
-### Projet 0 — `sentiment-analyzer` (déjà bootstrap dans ce repo, à migrer)
-- **Repo**   : Meuleur/AIproject (actuellement, dans `projects/sentiment-analyzer/`)
-- **Local**  : `projects/sentiment-analyzer/` (dans ce même repo de contrôle)
+### Projet 0 — `sentiment-analyzer`
+- **Repo**   : Meuleur/sentiment-analyzer
+- **Local**  : ~/Desktop/Dev/sentiment-analyzer
 - **Statut** : in progress
-- **Note**   : à migrer vers son propre repo `Meuleur/sentiment-analyzer` quand `/go` arrive sur ce projet. Le commit de migration sera : `chore: extract sentiment-analyzer to dedicated repo`.
 
 - [x] Bootstrap (structure dossier + README + smoke test)
-- [ ] Migrer le projet vers `Meuleur/sentiment-analyzer` (extraire `projects/sentiment-analyzer/` → nouveau repo)
-- [ ] Loader Allociné review subset depuis HuggingFace + test
-- [ ] Preprocessing FR (nettoyage, normalisation accents)
-- [ ] Tokenisation BPE Hugging Face
-- [ ] Baseline TF-IDF + LogReg + métriques
+- [x] Migrer le projet vers `Meuleur/sentiment-analyzer` (extraire `projects/sentiment-analyzer/` → nouveau repo)
+- [x] Loader Allociné review subset depuis HuggingFace + test
+- [x] Preprocessing FR (nettoyage, normalisation accents)
+- [x] Tokenisation BPE Hugging Face
+- [x] Baseline TF-IDF + LogReg + métriques
 - [ ] Fine-tuning Camembert-base avec `transformers.Trainer`
 - [ ] LoRA sur Camembert via peft
 - [ ] QLoRA (bnb-4bit) sur Camembert
