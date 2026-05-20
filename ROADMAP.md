@@ -58,7 +58,7 @@ Le slug est exactement le nom du repo GitHub. Quand `/go` rencontre un projet `n
 - [x] Run LoRA sur TinyLlama-1.1B (r=8, alpha=16) (#1)
 - [x] Run LoRA sur Qwen2.5-0.5B (100 steps MPS sur M1 Pro, voir lora-lab/BENCHMARK.md)
 - [ ] Run LoRA sur Qwen2.5-1.5B (#2) <!-- MPS OK (lent) -->
-- [ ] Run LoRA sur Phi-3-mini (#3) <!-- MPS OK (lent) -->
+- [ ] Run LoRA sur Phi-3-mini (#3) <!-- needs GPU (3.8B fp32 > 15 GB, ne tient pas sur M1 Pro 16 GB) -->
 - [ ] Variante QLoRA (bnb-4bit) sur les 4 modèles (#4) <!-- needs CUDA (bnb) -->
 - [ ] Sweep r ∈ {4, 8, 16, 32} (#5) <!-- MPS OK (lent) -->
 - [ ] Sweep alpha ∈ {8, 16, 32, 64} (#6) <!-- MPS OK (lent) -->
